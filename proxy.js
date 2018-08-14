@@ -35,6 +35,6 @@ const imgServer = http.createServer((req, res) => {
     }
     request.get(options, callback);
 });
-apiServer.listen(port, hostname, () => {
-    console.log('接口代理在http://'+hostname+":"+imgPort);
+imgServer.listen(imgPort, hostname, () => {
+    console.log('图片代理在http://'+hostname+":"+imgPort);
 }); 

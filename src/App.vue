@@ -12,27 +12,32 @@
             </li>
         </ul>
       </div>
-      <div class="daily-list">
+      <div class="daily-list" ref="list">
         <template v-if="type==='recommend'">
           <div v-for="list in recommemdList" :key="list">
             <div class="daily-date">{{formatDay(list.date)}}</div>
-            <Item v-for="item in list.stories" :key="item.id" :data='item'></Item>
+            <Item v-for="item in list.stories" 
+                :key="item.id" :data='item' @click="handleClick(item.id)"></Item>
           </div>
         </template>
         <template v-if="type==='daily'">
           <Item v-for="item in list" :key="item.id" :data="item"></Item>
         </template>
+        <button @click="prevRecommend">前一天</button>
       </div>
-      <daily-article></daily-article>
+      <daily-article :id="articleId">
+
+      </daily-article>
     </div>
 </template>
 
 <script>
 import $ from './lib/util';
 import Item from './components/item';
+import dailyArticle from "./components/daily-article";
 export default {
   name: 'App',
-  components:{Item},
+  components:{Item,dailyArticle},
   data(){
     return{
       themes:[],
@@ -42,7 +47,8 @@ export default {
       themeId:0,
       recommemdList:[],
       dailyTime:$.getTodayTime(),
-      isLoading:false
+      isLoading:false,
+      articleId:0
     }
   },
   methods:{
@@ -85,11 +91,31 @@ export default {
         day=day.substr(1,1);
       }
       return month+'月'+day+'日';
+    },
+    prevRecommend(){
+      const $list=this.$refs.list;
+
+      if(this.type==='daily'||this.isLoading) return;
+
+      this.dailyTime-=86400000;
+      this.getRecommendList();
+      
+    },
+    handleClick(id){
+      this.articleId=id;
     }
   },
   mounted(){
     this.getThemes();
     this.getRecommendList();
+    const $list=this.$refs.list;
+    $list.addEventListener('scroll',()=>{
+      if(this.type==='daily'||this.isLoading) return;
+      if($list.scrollTop+document.body.clientHeight>=$list.scrollHeight){
+        this.dailyTime-=86400000;
+        this.getRecommendList();
+      }
+    });
   }
 }
 </script>
